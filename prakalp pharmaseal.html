@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>MedChain  -  Mock Blockchain + QR</title>
+        <link rel="stylesheet" href="prakalp pharmaseal design.css" />
+        <link rel="icon" href="prakalp pharmaseal logo.png" />
+    </head>
+    <body>
+        <header>
+            <h1>Medicine BlockChain</h1>
+            <marquee>Mock Blockchain Ledger with QR Generation for Medicine Authenticity</marquee>
+        </header>
+        <div id="main_sec">
+            <form id="createPack" autocomplete="off">
+                <h2>Register Medicine (Create Pack)</h2>
+                <label>Medicine Name</label>
+                <input id="m_name" placeholder="Paracetamol 500mg" required />
+                <label>Manufacturing Company</label>
+                <input id="m_manufacturer" placeholder="Pharma Ltd" required />
+                <label>Batch No.</label>
+                <input id="m_batch" placeholder="B2025-001" required />
+                <label>Manufacturing Date</label>
+                <input id="m_man" placeholder="2025-09-01" type="date" required />
+                <label>Expiry Date</label>
+                <input id="m_exp" placeholder="2026-10" type="date" required />
+                <label>Quantity</label>
+                <input id="m_qty" type="number" placeholder="e.g. 10 strips" required />
+                <label>Quantity Unit</label>
+                <input id="m_qty_unit" placeholder="e.g. strips, bottles, vials, l, ml, g, mg etc" required />
+                <label>Complete Address of Manufacturing Plant</label>
+                <input id="m_location" placeholder="Full address, e.g. 123 Pharma Road, Ghaziabad, Uttar Pradesh, India" required />
+                <label>Plant Manager Name</label>
+                <input id="m_manager_name" placeholder="Mr. Ranjit Jana" required />
+                <label>Plant Manager Email ID</label>
+                <input id="m_manager_email" type="email" placeholder="manager@email.com" required />
+                <label>Official Company Email ID</label>
+                <input id="m_company_email" type="email" placeholder="contact@pharma.com" required />
+                <label>Manufacturing License Number</label>
+                <input id="m_license" placeholder="License Number" required />
+                <button type="submit">Create Pack & Add to Chain</button>
+                <button type="reset">Reset Form</button>
+                <div id="main_data_create">
+                    <h1 class="small">Generated Pack ID (scan or copy)</h1>
+                    <pre id="PackId"></pre>
+                    <div id="qrcode"></div>
+                </div>
+            </form>
+            <form id="scan_verify" autocomplete="off">
+                <h2>Verify Pack / Track Supply Chain</h2>
+                <label>Enter Pack ID (or paste scanned QR value)</label>
+                <input id="verifyID" placeholder="Paste Pack ID here" required />
+                <button type="submit">Verify and Track Supply Chain</button>
+                <button type="button" id="export_med_data">Export Medicine Data</button>
+                <pre id="verifyResult">No verification yet.</pre>
+                <h3>Note : Kindly verify your medicine via pack ID first so that you can perform action of transferring ownership and further 
+                    appending to next stage in medicine supply chain and store in our database!</h3>
+            </form>
+            <form id="transfer_owner" autocomplete="off"></form>
+        </div>
+        <div id="info_sec">
+            <h2>How Our Solution Empowers Genuine Healthcare</h2>
+            <ul>
+                <li>
+                    <strong>Unbreakable Medicine Identity:</strong> Every medicine strip or bottle receives a tamper-proof, blockchain-based unique 
+                    QR/NFC tag at the point of manufacture, making forgery virtually impossible and giving each unit an immutable digital identity 
+                    that can be verified anywhere.</li>
+                <li><strong>End-to-End Traceability:</strong> Custody transfers - from manufacturer to distributor, to retailer - are securely 
+                    recorded as signed blockchain transactions, establishing a freely auditable supply trail that exposes fakes and unauthorized 
+                    handling.
+                </li>
+                <li><strong>Instant Authenticity Checks:</strong> Scanning the QR/NFC code instantly reveals the full supply chain, validates each 
+                    link via cryptographic hash checks, and enables quick detection of tampering, counterfeits, and expired medicines at any 
+                    point - from rural clinics to urban pharmacies.</li>
+                <li><strong>Production-Grade Security:</strong> The system incorporates robust server-side blockchain infrastructure, secure QR/NFC 
+                    tag generation, advanced key management, KYC verification for all supply actors, and dynamic liveness checks for on-phone 
+                    scanning - making every point in the chain resilient to fraud and system abuse.</li>
+            </ul>
+        </div>
+    </body>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="prakalp pharmaseal working.js"></script>
+</html>
