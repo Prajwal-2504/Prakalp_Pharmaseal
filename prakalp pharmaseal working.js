@@ -7,6 +7,34 @@ function renderQRCode(usermedicinetext) {
     });
 };
 
+function resetformsandbtns(){
+    transferownerform.reset();
+    transferownerform.style.display = 'none';
+    transferownerform.innerHTML = ``;
+    transferownerform.onsubmit = null;
+    scanverifyform.reset();
+    scanVerifyBtn.disabled = false;
+    verifyResult.textContent = "";
+    verifyResult.style.display = 'none';
+    transferOwnerBtn.textContent = "";
+    transferOwnerBtn.style.display = 'none';
+}
+
+function transferformsandbtns(){
+    transferOwnerBtn.style.display = "block";
+    transferOwnerBtn.onclick = () => {
+        transferownerform.style.display = 'block';
+        transferOwnerBtn.disabled = true;
+        scanverifyform.reset();
+        scanverifyform.style.display = 'none';
+        scanVerifyBtn.disabled = true;
+        createPackform.reset();
+        main_data_create.style.display = 'none';
+        createPackform.style.display = 'none';
+        createPackBtn.disabled = false;
+    };
+}
+
 function timestamp(param) {
     if(param)   return `SIH-PK-${Date.now()}`; // unique timestamp ID
     const now = new Date();
@@ -19,25 +47,14 @@ function timestamp(param) {
     return `${currentyear}-${currentmonth}-${currentdate} at ${currenthours}:${currentminutes}:${currentseconds}`;    
 };
 
-const firebase = window.firebase;
-const firebaseConfig = {
-    apiKey: "AIzaSyBIBLM3Sa-uq8lGFLJpU4WkLLGRcU4VBWM",
-    authDomain: "prajwal-das-cse-projects.firebaseapp.com",
-    projectId: "prajwal-das-cse-projects",
-    storageBucket: "prajwal-das-cse-projects.firebasestorage.app",
-    messagingSenderId: "475168255084",
-    appId: "1:475168255084:web:8e5ca302083ec44ec67c49",
-    measurementId: "G-0WQ8970XQJ"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.firestore().collection('Smart_India_Hackathon');
 const stages = ["Manufacturer", "Warehouse", "Distributor", "Retailer", "Clinic", "Customer"];
 
 const QRCodehtml = document.getElementById('qrcode');
 const createPackform = document.getElementById('createPack');
-const main_data_create = document.getElementById('main_data_create');
+const scanverifyform = document.getElementById('scan_verify');
 const transferownerform = document.getElementById('transfer_owner');
-const verifyBtnform = document.getElementById('scan_verify');
+const infosec = document.getElementById('info_sec');
+const main_data_create = document.getElementById('main_data_create');
 const exportbtn = document.getElementById('export_med_data');
 const lastPackIdInput = document.getElementById('PackId');
 const verifyIdInput = document.getElementById('verifyID');
@@ -55,8 +72,42 @@ const ManagerEmailInput = document.getElementById('m_manager_email');
 const CompanyEmailInput = document.getElementById('m_company_email');
 const LicenseInput = document.getElementById('m_license');
 
+const createPackBtn = document.getElementById('createPackBtn');
+const scanVerifyBtn = document.getElementById('scanVerifyBtn');
+const transferOwnerBtn = document.getElementById('transferOwnerBtn');
+const infoBtn = document.getElementById('infoBtn');
+
+createPackBtn.onclick = () => {
+    createPackform.style.display = 'block';
+    createPackBtn.disabled = true;
+    scanverifyform.reset();
+    scanverifyform.style.display = 'none';
+    transferownerform.reset();
+    transferownerform.style.display = 'none';
+    transferOwnerBtn.disabled = false;
+    if(transferOwnerBtn.style.display !== 'block')    scanVerifyBtn.disabled = false;
+};
+scanVerifyBtn.onclick = () => {
+    scanverifyform.style.display = 'block';
+    scanVerifyBtn.disabled = true;
+    createPackform.reset();
+    main_data_create.style.display = 'none';
+    createPackform.style.display = 'none';
+    createPackBtn.disabled = false;
+};
+infoBtn.onclick = () => {
+    if(infoBtn.textContent === "Show Website Information") {
+        infoBtn.textContent = "Hide Website Information";
+        infosec.style.display = 'block';
+    }
+    else {
+        infoBtn.textContent = "Show Website Information";
+        infosec.style.display = 'none';
+    }
+};
+
 createPackform.onsubmit = createPack;
-verifyBtnform.onsubmit = verifyPack;
+scanverifyform.onsubmit = verifyPack;
 exportbtn.onclick = exportMedData;
 
 window.onload = () => renderQRCode('');
@@ -148,6 +199,8 @@ function createPack(e) {
         lastPackIdInput.textContent = packId;
         main_data_create.style.display = 'block';
         createPackform.reset();
+        main_data_create.style.display = 'none';
+
         navigator.clipboard.writeText(packId);
         alert(`Pack created : ${packId}, and copied to clipboard. \nPlease save this ID as it will be required for future verification and ownership transfers.`);
     }).catch(error => alert(`Error creating new medicine pack in database : ${error}`));
@@ -174,7 +227,7 @@ async function verifyPack(e) {
                 // 1. Check for missing intermediate stages (supply chain break)
                 for (let i = 0; i < presentStages.length; i++) {
                     if (stages[i] !== presentStages[i]) {
-                        errorMsg = `Missing Stage : "${stages[i]}".\nThis indicates medicine has been tampered!`;
+                        errorMsg = `Missing Stage : "${stages[i]}". This indicates medicine has been tampered!`;
                         whathappened = "exists but its supply chain is broken";
                         break verification;
                     }
@@ -305,7 +358,7 @@ async function verifyPack(e) {
                         if (stageData && stageData.Added_to_Database) {
                             const addedDate = new Date(stageData.Added_to_Database.split(" at ")[0].replace(/\//g, '-'));
                             if (addedDate < manDate) {
-                                errorMsg = `"Added to Database" date (${stageData.Added_to_Database}) at stage "${stage}" \nis before manufacturing date (${manufacturerMan}) of medicine`;
+                                errorMsg = `"Added to Database" date (${stageData.Added_to_Database}) at stage "${stage}" is before manufacturing date (${manufacturerMan}) of medicine`;
                                 whathappened = "is tampered";
                                 break verification;
                             }
@@ -412,22 +465,21 @@ function appendtransfer(packid, current_stage) {
     else if (current_stage === "Clinic") transferownerfromclinictocustomer(packid);
     else if (current_stage === "Customer") {
         transferownerform.innerHTML = `
-            <h3>This medicine has already reached the Customer. No further transfers allowed.</h3>
+            <h2>This medicine has already reached the Customer. No further transfers allowed.</h2>
         `;
         transferownerform.onsubmit = null; // remove any previous submit handler
     }
     else{
         transferownerform.innerHTML = `
-            <h3>Invalid current stage: ${current_stage}. This means medicine has been tampered with and has invalid data despite being in our database. Ownership transfer not possible.</h3>
+            <h2>Invalid current stage: ${current_stage}. This means medicine has been tampered with and has invalid data despite being in our database. Ownership transfer not possible.</h2>
         `;
         transferownerform.onsubmit = null; // remove any previous submit handler
     }
-    transferownerform.style.display = 'block';
 }
 
 function transferownerfrommanufacturertowarehouse(packid) {
     transferownerform.innerHTML = `
-        <h3>Transfer Ownership: Manufacturer → Warehouse</h3>
+        <h2>Transfer Ownership: Manufacturer → Warehouse</h2>
         <label for="wh_pack">Pack ID:</label>
         <input type="text" id="wh_pack" name="wh_pack" value="${packid}" readonly required>
         <label for="wh_new_owner">New Owner Category:</label>
@@ -489,20 +541,16 @@ function transferownerfrommanufacturertowarehouse(packid) {
             }
         }, { merge: true }).then(response => {
             alert(`Ownership of Pack ID ${packId} successfully transferred to Warehouse: ${warehouseName}, ${warehouseLoc}`);
-            transferownerform.reset();
-            transferownerform.style.display = 'none';
-            transferownerform.innerHTML = ``;
-            transferownerform.onsubmit = null; // remove the submit handler
-            verifyBtnform.reset(); // reset verify form to allow re-verification
-            verifyResult.textContent = "";
-            verifyResult.style.display = 'none';
+            resetformsandbtns();
         }).catch(error => alert(`Error transferring ownership to Warehouse in database : ${error}`));
     };
+    transferOwnerBtn.textContent = "Transfer Ownership: Manufacturer → Warehouse";
+    transferformsandbtns();
 }
 
 function transferownerfromwarehousetodistributor(packid) {
     transferownerform.innerHTML = `
-        <h3>Transfer Ownership: Warehouse → Distributor</h3>
+        <h2>Transfer Ownership: Warehouse → Distributor</h2>
         <label for="dbr_pack">Pack ID:</label>
         <input type="text" id="dbr_pack" name="dbr_pack" value="\${packid}" readonly required>
         <label for="dbr_new_owner">New Owner Category:</label>
@@ -562,20 +610,16 @@ function transferownerfromwarehousetodistributor(packid) {
             }
         }, { merge: true }).then(response => {
             alert(`Ownership of Pack ID ${packId} successfully transferred to Distributor: ${distributorName}, ${distributorLoc}`);
-            transferownerform.reset();
-            transferownerform.style.display = 'none';
-            transferownerform.innerHTML = ``;
-            transferownerform.onsubmit = null;
-            verifyBtnform.reset();
-            verifyResult.textContent = "";
-            verifyResult.style.display = 'none';
+            resetformsandbtns();
         }).catch(error => alert(`Error transferring ownership to Distributor in database : ${error}`));
     };
+    transferOwnerBtn.textContent = "Transfer Ownership: Warehouse → Distributor";
+    transferformsandbtns();
 }
 
 function transferownerfromdistributortoretailer(packid) {
     transferownerform.innerHTML = `
-        <h3>Transfer Ownership: Distributor → Retailer</h3>
+        <h2>Transfer Ownership: Distributor → Retailer</h2>
         <label for="rtl_pack">Pack ID:</label>
         <input type="text" id="rtl_pack" name="rtl_pack" value="\${packid}" readonly required>
         <label for="rtl_new_owner">New Owner Category:</label>
@@ -635,20 +679,16 @@ function transferownerfromdistributortoretailer(packid) {
             }
         }, { merge: true }).then(response => {
             alert(`Ownership of Pack ID ${packId} successfully transferred to Retailer: ${retailerName}, ${retailerLoc}`);
-            transferownerform.reset();
-            transferownerform.style.display = 'none';
-            transferownerform.innerHTML = ``;
-            transferownerform.onsubmit = null;
-            verifyBtnform.reset();
-            verifyResult.textContent = "";
-            verifyResult.style.display = 'none';
+            resetformsandbtns();
         }).catch(error => alert(`Error transferring ownership to Retailer in database : ${error}`));
     };
+    transferOwnerBtn.textContent = "Transfer Ownership: Distributor → Retailer";
+    transferformsandbtns();
 }
 
 function transferownerfromretailertoclinic(packid) {
     transferownerform.innerHTML = `
-        <h3>Transfer Ownership: Retailer → Clinic</h3>
+        <h2>Transfer Ownership: Retailer → Clinic</h2>
         <label for="cln_pack">Pack ID:</label>
         <input type="text" id="cln_pack" name="cln_pack" value="\${packid}" readonly required>
         <label for="cln_new_owner">New Owner Category:</label>
@@ -675,7 +715,6 @@ function transferownerfromretailertoclinic(packid) {
         <button type="reset">Reset Form</button>
     `;
 
-    
     transferownerform.onsubmit = (e) => {
         e.preventDefault();
 
@@ -709,20 +748,16 @@ function transferownerfromretailertoclinic(packid) {
             }
         }, { merge: true }).then(response => {
             alert(`Ownership of Pack ID ${packId} successfully transferred to Clinic: ${clinicName}, ${clinicLoc}`);
-            transferownerform.reset();
-            transferownerform.style.display = 'none';
-            transferownerform.innerHTML = ``;
-            transferownerform.onsubmit = null;
-            verifyBtnform.reset();
-            verifyResult.textContent = "";
-            verifyResult.style.display = 'none';
+            resetformsandbtns();
         }).catch(error => alert(`Error transferring ownership to Clinic in database : ${error}`));
     };
+    transferOwnerBtn.textContent = "Transfer Ownership: Retailer → Clinic";
+    transferformsandbtns();
 }
 
 function transferownerfromclinictocustomer(packid) {
     transferownerform.innerHTML = `
-        <h3>Transfer Ownership: Clinic → Customer</h3>
+        <h2>Transfer Ownership: Clinic → Customer</h2>
         <label for="cst_pack">Pack ID:</label>
         <input type="text" id="cst_pack" name="cst_pack" value="\${packid}" readonly required>
         <label for="cst_new_owner">New Owner Category:</label>
@@ -771,13 +806,22 @@ function transferownerfromclinictocustomer(packid) {
             }
         }, { merge: true }).then(response => {
             alert(`Ownership of Pack ID ${packId} successfully transferred to Customer: ${customerName}`);
-            transferownerform.reset();
-            transferownerform.style.display = 'none';
-            transferownerform.innerHTML = ``;
-            transferownerform.onsubmit = null;
-            verifyBtnform.reset();
-            verifyResult.textContent = "";
-            verifyResult.style.display = 'none';
+            resetformsandbtns();
         }).catch(error => alert(`Error transferring ownership to Customer in database : ${error}`));
     };
+    transferOwnerBtn.textContent = "Transfer Ownership: Clinic → Customer";
+    transferformsandbtns();
 }
+
+const firebase = window.firebase;
+const firebaseConfig = {
+    apiKey: "AIzaSyBIBLM3Sa-uq8lGFLJpU4WkLLGRcU4VBWM",
+    authDomain: "prajwal-das-cse-projects.firebaseapp.com",
+    projectId: "prajwal-das-cse-projects",
+    storageBucket: "prajwal-das-cse-projects.firebasestorage.app",
+    messagingSenderId: "475168255084",
+    appId: "1:475168255084:web:8e5ca302083ec44ec67c49",
+    measurementId: "G-0WQ8970XQJ"
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.firestore().collection('Smart_India_Hackathon');
