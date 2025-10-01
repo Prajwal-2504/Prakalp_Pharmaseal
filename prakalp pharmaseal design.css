@@ -6,7 +6,7 @@ body {
     max-width: 1280px;
     padding: 18px;
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #0c6cc6, #1134e3, #3906b0, #9d19d1, #950cab, #ed05af);
+    background: linear-gradient(90deg, #0c6cc6, #1134e3, #3906b0, #9d19d1, #950cab, #ed05af);
     background-size: 300% 300%;
     animation: gradientBG 12s ease infinite;
 }
@@ -228,4 +228,5 @@ th {
 }
 #main_btns #transferOwnerBtn{
     display: none;
+
 }
