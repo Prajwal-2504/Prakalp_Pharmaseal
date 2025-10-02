@@ -199,8 +199,6 @@ function createPack(e) {
         lastPackIdInput.textContent = packId;
         main_data_create.style.display = 'block';
         createPackform.reset();
-        main_data_create.style.display = 'none';
-
         navigator.clipboard.writeText(packId);
         alert(`Pack created : ${packId}, and copied to clipboard. \nPlease save this ID as it will be required for future verification and ownership transfers.`);
     }).catch(error => alert(`Error creating new medicine pack in database : ${error}`));
@@ -824,4 +822,5 @@ const firebaseConfig = {
     measurementId: "G-0WQ8970XQJ"
 };
 firebase.initializeApp(firebaseConfig);
+
 const database = firebase.firestore().collection('Smart_India_Hackathon');
